@@ -1,20 +1,7 @@
-Build status: [![Build Status](https://travis-ci.org/bitcoinj/bitcoinj.png?branch=master)](https://travis-ci.org/bitcoinj/bitcoinj)  
-Coverage status: [![Coverage Status](https://coveralls.io/repos/bitcoinj/bitcoinj/badge.png?branch=master)](https://coveralls.io/r/bitcoinj/bitcoinj?branch=master)
 
-### Welcome to bitcoinj
+### Welcome to bitcoinrwj
 
-The bitcoinj library is a Java implementation of the Bitcoin protocol, which allows it to maintain a wallet and send/receive transactions without needing a local copy of Bitcoin Core. It comes with full documentation and some example apps showing how to use it.
-
-### Technologies
-
-* Java 6 for the core modules, Java 8 for everything else
-* [Maven 3+](http://maven.apache.org) - for building the project
-* [Orchid](https://github.com/subgraph/Orchid) - for secure communications over [TOR](https://www.torproject.org)
-* [Google Protocol Buffers](https://code.google.com/p/protobuf/) - for use with serialization and hardware communications
-
-### Getting started
-
-To get started, it is best to have the latest JDK and Maven installed. The HEAD of the `master` branch contains the latest development code and various production releases are provided on feature branches.
+The bitcoinrwj library is a Java implementation of the Bitcoin protocol, which allows it to maintain a wallet and send/receive transactions without needing a local copy of Bitcoin Core. It comes with full documentation and some example apps showing how to use it.
 
 #### Building from the command line
 
@@ -22,36 +9,44 @@ To perform a full build use
 ```
 mvn clean package
 ```
-You can also run
-```
-mvn site:site
-```
-to generate a website with useful information like JavaDocs.
-
-The outputs are under the `target` directory.
-
-#### Building from an IDE
-
-Alternatively, just import the project using your IDE. [IntelliJ](http://www.jetbrains.com/idea/download/) has Maven integration built-in and has a free Community Edition. Simply use `File | Import Project` and locate the `pom.xml` in the root of the cloned project source tree.
 
 ### Example applications
 
 These are found in the `examples` module.
 
-#### Forwarding service
 
-This will download the block chain and eventually print a Bitcoin address that it has generated.
+#### Other GUI Wallet considerations
 
-If you send coins to that address, it will forward them on to the address you specified.
+1) [breadwallet](https://github.com/breadwallet/breadwallet-core) - SPV bitcoin C library
+2) [spvwallet](https://github.com/OpenBazaar/spvwallet) - P2P SPV Wallet/Library in Go used in OpenBazaar 2.0
+3) [webcoin](https://github.com/mappum/webcoin) - SPV Bitcoin client for Node.js and the browser
 
+#### How to make bitcoinj work for BitcoinRework ?
+
+1) BitcoinRework forked at height `504964` and changed difficulty to 1 (nBits = `0x1d00ffff`) to allow mining of blocks feasible but that caused problem with `checkDifficultyTransitions()` (see commit [35d2391658c515ae1b8efb5383dba2e94fe5abc0](https://github.com/spl0i7/bitcoinrwj/commit/35d2391658c515ae1b8efb5383dba2e94fe5abc0) ) in bitcoinj so that had to be taken care of.
+
+2) `ForkNetParams` (see commit [35d2391658c515ae1b8efb5383dba2e94fe5abc0](https://github.com/spl0i7/bitcoinrwj/commit/35d2391658c515ae1b8efb5383dba2e94fe5abc0) ) was also adjusted according to network parameter requirement for BitcoinRework, please use this class instead of `MainNetParams`.
+
+3) You'll need to add peers manaully when using `ForkNetParamsjava`
+```java
+bitcoin.setPeerNodes(new PeerAddress(InetAddress.getByName("0x9F598BF6"), 7337));
+bitcoin.setPeerNodes(new PeerAddress(InetAddress.getByName("0x9F598120"), 7337));
+bitcoin.setPeerNodes(new PeerAddress(InetAddress.getByName("0xA5E3323E"), 7337));
 ```
-  cd examples
-  mvn exec:java -Dexec.mainClass=org.bitcoinj.examples.ForwardingService -Dexec.args="<insert a bitcoin address here>"
-```
+Where `bitcoin` in an instance of `WalletAppKit`
 
-Note that this example app *does not use checkpointing*, so the initial chain sync will be pretty slow. You can make an app that starts up and does the initial sync much faster by including a checkpoints file; see the documentation for
-more info on this technique.
+4) ProfoBuf serialization of transaction hash is getting corrupted (see commit [35d2391658c515ae1b8efb5383dba2e94fe5abc0](https://github.com/spl0i7/bitcoinrwj/commit/35d2391658c515ae1b8efb5383dba2e94fe5abc0) )  as of now, so warning had to be turned off.
+
+#### Bitcoin Testing status
+
+Tested on linux environment? √
+Tested on windows? √
+
+#### Current Issues 
+
+- Fix Protobuf serialization issue.
 
 ### Where next?
 
 Now you are ready to [follow the tutorial](https://bitcoinj.github.io/getting-started).
+
