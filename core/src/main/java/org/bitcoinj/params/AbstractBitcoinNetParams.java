@@ -39,7 +39,7 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
      * Scheme part for Bitcoin URIs.
      */
     public static final String BITCOIN_SCHEME = "bitcoin";
-
+    public static int BTCRW_FORKHEIGHT = 504964;
     private static final Logger log = LoggerFactory.getLogger(AbstractBitcoinNetParams.class);
 
     public AbstractBitcoinNetParams() {
@@ -58,6 +58,7 @@ public abstract class AbstractBitcoinNetParams extends NetworkParameters {
     @Override
     public void checkDifficultyTransitions(final StoredBlock storedPrev, final Block nextBlock,
     	final BlockStore blockStore) throws VerificationException, BlockStoreException {
+    	if(storedPrev.getHeight() == BTCRW_FORKHEIGHT - 1) return;
         Block prev = storedPrev.getHeader();
 
         // Is this supposed to be a difficulty transition point?
